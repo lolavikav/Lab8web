@@ -212,6 +212,150 @@ Berikut Hasilnya:
 
 ## 7. Mengubah Data ( UPDATE)
 ```
+<?php
+include_once 'koneksi.php';
+
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    die("ID tidak ditemukan");
+}
+
+// ambil data lama
+$sql = "SELECT * FROM data_barang WHERE id_barang='$id'";
+$result = mysqli_query($conn, $sql);
+$data = mysqli_fetch_assoc($result);
+
+if (!$data) die("Data tidak tersedia");
+
+if (isset($_POST['submit'])) {
+    $nama = $_POST['nama'];
+    $kategori = $_POST['kategori'];
+    $harga_jual = $_POST['harga_jual'];
+    $harga_beli = $_POST['harga_beli'];
+    $stok = $_POST['stok'];
+
+    $gambar = $data['gambar'];
+    if (isset($_FILES['file_gambar']) && $_FILES['file_gambar']['error'] == 0) {
+        $filename = str_replace(' ', '_', $_FILES['file_gambar']['name']);
+        $destination = 'gambar/' . $filename;
+        if (move_uploaded_file($_FILES['file_gambar']['tmp_name'], $destination)) {
+            $gambar = $destination;
+        }
+    }
+
+    $sql_update = "UPDATE data_barang SET 
+                    nama='$nama', 
+                    kategori='$kategori', 
+                    harga_jual='$harga_jual', 
+                    harga_beli='$harga_beli', 
+                    stok='$stok', 
+                    gambar='$gambar'
+                   WHERE id_barang='$id'";
+    mysqli_query($conn, $sql_update);
+    header('Location: index.php');
+    exit;
+}
+
+// fungsi untuk selected option
+function is_select($var, $val) {
+    return $var == $val ? 'selected' : '';
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Ubah Barang</title>
+<link href="style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="container">
+    <h1>Ubah Barang</h1>
+    <form method="post" action="" enctype="multipart/form-data">
+        <label>Nama Barang</label><br>
+        <input type="text" name="nama" value="<?= $data['nama']; ?>" required><br><br>
+
+        <label>Kategori</label><br>
+        <select name="kategori" required>
+            <option value="Komputer" <?= is_select($data['kategori'], 'Komputer'); ?>>Komputer</option>
+            <option value="Elektronik" <?= is_select($data['kategori'], 'Elektronik'); ?>>Elektronik</option>
+            <option value="Hand Phone" <?= is_select($data['kategori'], 'Hand Phone'); ?>>Hand Phone</option>
+        </select><br><br>
+
+        <label>Harga Jual</label><br>
+        <input type="number" name="harga_jual" value="<?= $data['harga_jual']; ?>" required><br><br>
+
+        <label>Harga Beli</label><br>
+        <input type="number" name="harga_beli" value="<?= $data['harga_beli']; ?>" required><br><br>
+
+        <label>Stok</label><br>
+        <input type="number" name="stok" value="<?= $data['stok']; ?>" required><br><br>
+
+        <label>File Gambar</label><br>
+        <input type="file" name="file_gambar"><br>
+        <?php if($data['gambar']): ?>
+            <img src="<?= $data['gambar']; ?>" width="100" alt="<?= $data['nama']; ?>">
+        <?php endif; ?><br><br>
+
+        <input type="submit" name="submit" value="Simpan">
+    </form>
+</div>
+</body>
+</html>
+```
+
+Membuat file baru di VSCode dengan nama `ubah.php`. File ini berfungsi sebagai halaman untuk meperbarui data barang berdasarkan ID yang dipilih dari halaman utama. Pengguna dapat mengubah nama barang, kategori, harga jual, harga beli, stok dan juga menggati gambar.
+
+Hasilnya:
+<img width="1917" height="932" alt="image" src="https://github.com/user-attachments/assets/89162d51-dde6-4f47-bf54-1590e02efb94" />
+<img width="1910" height="696" alt="image" src="https://github.com/user-attachments/assets/173c3d7d-2bfd-497d-a47a-4714b5efaf9d" />
+
+## 8. Menghapus Data (DELETE)
+```
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+include_once 'koneksi.php';
+
+// Ambil ID dari URL
+$id = $_GET['id'] ?? null;
+
+if (!$id) {
+    die("Error: ID tidak ditemukan di URL");
+}
+
+// Cek apakah data dengan ID tersebut ada
+$cek = mysqli_query($conn, "SELECT * FROM data_barang WHERE id_barang='$id'");
+if (!$cek) {
+    die("Error query cek data: " . mysqli_error($conn));
+}
+if (mysqli_num_rows($cek) == 0) {
+    die("Error: Data dengan ID $id tidak ditemukan");
+}
+
+// Hapus data
+$sql = "DELETE FROM data_barang WHERE id_barang='$id'";
+$result = mysqli_query($conn, $sql);
+
+if (!$result) {
+    die("Error menghapus data: " . mysqli_error($conn));
+}
+
+// Jika berhasil, redirect ke index.php
+header('Location: index.php');
+exit;
+?>
+```
+
+Membuat file baru di VSCode dengan nama `hapus.php`. File ini digunakan untuk menghapus data barang dari database berdasarkan ID yang dikirim melalui URL. Pada bagian awal, file ini mengambil ID dan melakukan pengecekan untuk memastikan ID tersebut benar-benar ada dalam database. Jika data ditemukan, sistem menjalankan query `DELETE` untuk menghapus baris data sesuai ID yang dipilih. File ini juga melengkapi dengan pengecekkan error, sehingga apabila terjadin kessalahan pada proses query, pesan error akan langsung ditampilkan.
+
+
+Hasilnya:
+<img width="1917" height="721" alt="image" src="https://github.com/user-attachments/assets/d9e1d946-9584-4028-8e5d-b87e0391e196" />
+<img width="1919" height="695" alt="image" src="https://github.com/user-attachments/assets/f8b8ae12-8a71-48dd-ac7e-8708fe880a25" />
+<img width="1919" height="599" alt="image" src="https://github.com/user-attachments/assets/067927a1-b5a2-4174-ba68-21610b8f08a1" />
+
 
 
 
