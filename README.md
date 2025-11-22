@@ -36,4 +36,29 @@ lab8_php_database/ │── index.php │── tambah.php │── ubah.php �
  stok int(4)
 );`
 
+## C. Menambah Data
+`VALUES ('Elektronik', 'HP Samsung Android', 'hp_samsung.jpg', 2000000, 2400000, 5), 
+('Elektronik', 'HP Xiaomi Android', 'hp_xiaomi.jpg', 1000000, 1400000, 5), 
+('Elektronik', 'HP OPPO Android', 'hp_oppo.jpg', 1800000, 2300000, 5);`
+
+Berikut Hasilnya:
+<img width="1076" height="409" alt="image" src="https://github.com/user-attachments/assets/0c2ccc8c-febc-4f93-a585-071784a3829d" />
+
+## 4. Membuat file koneksi database
+```
+<?php 
+$host = "localhost"; 
+$user = "root"; 
+$pass = ""; 
+$db   = "latihan1"; 
+
+$conn = mysqli_connect($host, $user, $pass, $db); 
+if ($conn == false) 
+{ 
+   echo "Koneksi ke server gagal."; 
+   die(); 
+} #else echo "Koneksi berhasil"; 
+?>
+```
+
 
